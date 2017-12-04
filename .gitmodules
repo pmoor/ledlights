@@ -1,0 +1,9 @@
+[submodule "libraries/FastLED"]
+	path = libraries/FastLED
+	url = https://github.com/FastLED/FastLED.git
+[submodule "libraries/ArduinoSTL"]
+	path = libraries/ArduinoSTL
+	url = https://github.com/mike-matera/ArduinoSTL.git
+[submodule "libraries/RTClib"]
+	path = libraries/RTClib
+	url = https://github.com/adafruit/RTClib.git
