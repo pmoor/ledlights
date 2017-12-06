@@ -10,11 +10,24 @@
 #define NUM_LEDS    794
 //#define NUM_LEDS    103
 CRGB leds[NUM_LEDS];
+RTC_DS3231 rtc;
 CHSV kHalloweenColors[4];
    
 #define FRAMES_PER_SECOND  120
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  if (!rtc.begin() || rtc.lostPower()) {
+    while (true) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(500);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(500);
+    }
+  }
+
+  //rtc.adjust(DateTime(2017, 12, 5, 21, 52, 00));
+
   kHalloweenColors[0] = CHSV(0, 0xff, 0xff);
   kHalloweenColors[1] = CHSV(16, 0xff, 0xff);
   kHalloweenColors[2] = CHSV(32, 0xff, 0xff);
@@ -40,8 +53,37 @@ SimplePatternList gPatterns = { xmas };
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 uint16_t gFrame = 0;
-  
+
 void loop() {
+  DateTime now = rtc.now();
+  // "daytime" in PST in Menlo Park, CA:
+  //06/21 -> 4:48am - 7:32pm
+  //12/21 -> 7:19am - 4:54pm
+
+  if (now.hour() >= 23 || now.hour() <= 5) {
+    loop_off();
+  } else if (now.hour() >= 21 || now.hour() <= 6) {
+    loop_calm();
+  } else if (now.hour() >= 17 || now.hour() <= 7) {
+    loop_crazy();
+  } else {
+    loop_off();
+  }
+}
+
+void loop_off() {
+  for (int i = 0; i < 256; i++) {
+    fadeToBlackBy(leds, NUM_LEDS, 1);
+    FastLED.show();
+  }
+  FastLED.clear();
+  FastLED.show();
+  for (int i = 0; i < 5 * 60; i++) {
+    delay(1000);
+  }
+}
+
+void loop_calm() {
   FastLED.setBrightness(0xff);
   FastLED.clear();
 
@@ -80,7 +122,7 @@ void loop() {
   }
 }
 
-void loop_old() {
+void loop_crazy() {
   FastLED.clear();
   FastLED.setBrightness(255);
 
@@ -159,9 +201,6 @@ void loop_old() {
     fadeToBlackBy(leds, NUM_LEDS, 4);
     FastLED.delay(20);
   }
-
-
-
   
   FastLED.clear();
   FastLED.setBrightness(0x10);
@@ -205,7 +244,7 @@ void loop_old() {
   FastLED.delay(1700);
 
   for (int k = 0; k < 128 * 2; k++) {
-    int offset = (int(sin8(2 * k)) - 128) / 8;
+    int offset = (int(sin8(4 * k)) - 128) / 8;
 //    int offset = (k / 2 + 16) % 48;
     //if (offset >= 24) offset = 48 - offset;
 
