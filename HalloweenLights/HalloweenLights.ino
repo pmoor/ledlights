@@ -1,16 +1,11 @@
 // Based on Mark Kriegsman's DemoReel100.ino.
 
 #include "FastLED.h"
-#include "ArduinoSTL.h"
-#include "RTClib.h"
-#include <set>
-#include <limits>
 
 #define DATA_PIN    2
 #define NUM_LEDS    794
 //#define NUM_LEDS    103
 CRGB leds[NUM_LEDS];
-RTC_DS3231 rtc;
 CHSV kHalloweenColors[4];
    
 #define FRAMES_PER_SECOND 120
@@ -23,11 +18,11 @@ void setup() {
   //kHalloweenColors[4] = CHSV(88, 0xff, 0x8f);
   
   FastLED.addLeds<WS2812B,DATA_PIN,GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(0x10);
+  FastLED.setBrightness(0xbb);
   FastLED.setDither(DISABLE_DITHER);
   //FastLED.setDither(BINARY_DITHER);
-  FastLED.setCorrection(UncorrectedColor);
-  //FastLED.setCorrection(TypicalLEDStrip);
+  //FastLED.setCorrection(UncorrectedColor);
+  FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setTemperature(UncorrectedTemperature);
 }
 
@@ -42,17 +37,20 @@ uint16_t gFrame = 0;
 
 void loop()
 {
-  // Call the current pattern function once, updating the 'leds' array
+  unsigned long time_start = millis();
+
   gPatterns[gCurrentPatternNumber]();
 
-  // send the 'leds' array out to the actual LED strip
-  FastLED.show();  
-  // insert a delay to keep the framerate modest
-  FastLED.delay(1000/FRAMES_PER_SECOND); 
-
-  // do some periodic updates
-  EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
+  EVERY_N_MILLISECONDS( 50 ) { gHue++; } // slowly cycle the "base color" through the rainbow
   EVERY_N_SECONDS( 30 ) { nextPattern(); } // change patterns periodically
+  gFrame++;
+
+  unsigned long time_end = millis();
+  if (time_end < time_start + 1000 / FRAMES_PER_SECOND) {
+    FastLED.delay((time_start + 1000 / FRAMES_PER_SECOND) - time_end);
+  } else {
+    FastLED.show();
+  }
 }
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
