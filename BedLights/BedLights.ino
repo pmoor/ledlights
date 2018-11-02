@@ -2,11 +2,13 @@
 
 
 #define DATA_PIN    3
-#define NUM_LEDS    100
+#define NUM_LEDS    112
 CRGB leds[NUM_LEDS];
 float offset = 0.0;
    
 #define FRAMES_PER_SECOND  60
+
+
 
 void setup() {
   pinMode(3, OUTPUT);
@@ -25,10 +27,10 @@ void setup() {
   
 void loop()
 {
-  int brightness = map(analogRead(0), 0, 1023, 0, 255);
+  int brightness = map(analogRead(0), 0, 1023, 0, 0xff);
   int speed = map(analogRead(1), 0, 1023, 0, 10);
   int base = map(analogRead(2), 0, 1023, 0, 255);
-  int width = map(analogRead(3), 0, 1023, 1, 100);
+  int width = map(analogRead(3), 0, 1023, 1, NUM_LEDS);
 
   bool glitter = digitalRead(4) ==  HIGH;
   bool on = digitalRead(5) == HIGH;
